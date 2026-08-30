@@ -4,8 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Who Beats the Berkeley Odds?",
-    page_icon="🐻",
+    page_title="Berkeley Admissions: Actual vs. Expected",
     layout="wide"
 )
 
@@ -79,10 +78,10 @@ consistent = stable[
 # -----------------------------
 # Header
 # -----------------------------
-st.title("🐻 Who Beats the Berkeley Odds?")
+st.title("Berkeley Admissions: Actual vs. Expected")
 
 st.subheader(
-    "Which Bay Area public high schools consistently outperformed "
+    "Which Bay Area public high schools consistently exceeded"
     "their expected UC Berkeley admit rate from 2023–2025?"
 )
 
@@ -331,34 +330,46 @@ with right:
 # Methodology
 # -----------------------------
 st.divider()
-st.header("Methodology")
 
-st.markdown(
-    """
-This analysis uses the provided **dashboard_data.csv** dataset and focuses on
+with st.expander("Methodology & Limitations"):
+    st.markdown(
+        """
+### How the analysis works
+
+This analysis uses the provided `dashboard_data.csv` dataset and focuses on
 Bay Area public high schools with UC Berkeley applicants from **Fall 2023
 through Fall 2025**.
 
-The dataset provides an **expected admit rate** based on a-g completion,
-poverty, applicant GPA, and school size. I compare each school's actual
-Berkeley admit rate with that expected baseline.
+The dataset provides an **expected admit rate** based on:
 
-For multi-year comparisons, expected admits and actual admits are aggregated
-using applicant counts rather than averaging annual percentages. This prevents
-a small applicant cohort from receiving the same weight as a much larger one.
+- a-g completion
+- poverty
+- applicant GPA
+- school size
 
-For the consistent-outperformer ranking, schools must:
+I compare each school's actual Berkeley admit rate with that expected baseline.
 
-- have observations in all three years,
+### What counts as a "consistent outperformer"?
+
+A school must:
+
+- have observations in **all three years (2023–2025)**,
 - have at least **50 total Berkeley applicants**, and
-- outperform their expected admit rate in all three years.
+- outperform its expected admit rate in **every year**.
 
-These are aggregated school-level relationships. They should not be interpreted
-as causal effects or as predictions of any individual student's admission.
+The 50-applicant minimum reduces the influence of very small applicant pools,
+where only a few admission decisions can dramatically change the admit rate.
+
+### Multi-year calculation
+
+Actual and expected admits are aggregated using applicant counts before
+calculating the three-year rates. This avoids giving a small applicant cohort
+the same weight as a much larger one.
+
+### Important limitation
+
+These are aggregated **school-level relationships**, not individual student
+records. The results should not be interpreted as causal effects or as
+predictions of an individual student's probability of admission.
 """
-)
-
-st.caption(
-    "Source: UC Admissions Data Challenge datasets derived from the "
-    "University of California Information Center and California Department of Education."
-)
+    )
