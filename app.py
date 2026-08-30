@@ -1,0 +1,351 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+st.set_page_config(
+    page_title="Who Beats the Berkeley Odds?",
+    page_icon="🐻",
+    layout="wide"
+)
+
+# -----------------------------
+# Load and prepare data
+# -----------------------------
+@st.cache_data
+def load_data():
+    df = pd.read_csv("dashboard_data.csv", low_memory=False)
+
+    berkeley = df[
+        (df["campus"] == "Berkeley") &
+        (df["fall_term"].between(2023, 2025)) &
+        (df["expected_admit_rate"].notna()) &
+        (df["applicants"].notna()) &
+        (df["admits"].notna())
+    ].copy()
+
+    berkeley["expected_admits"] = (
+        berkeley["expected_admit_rate"] *
+        berkeley["applicants"]
+    )
+
+    return berkeley
+
+berkeley = load_data()
+
+# -----------------------------
+# Multi-year school summary
+# -----------------------------
+summary = berkeley.groupby("high_school").agg(
+    total_applicants=("applicants", "sum"),
+    total_admits=("admits", "sum"),
+    expected_admits=("expected_admits", "sum"),
+    years=("fall_term", "nunique"),
+    positive_years=("admit_rate_residual", lambda x: (x > 0).sum())
+).reset_index()
+
+summary["actual_rate"] = (
+    summary["total_admits"] /
+    summary["total_applicants"]
+)
+
+summary["expected_rate"] = (
+    summary["expected_admits"] /
+    summary["total_applicants"]
+)
+
+summary["outperformance_pp"] = (
+    summary["actual_rate"] -
+    summary["expected_rate"]
+) * 100
+
+# Schools with all 3 years and enough applicants
+stable = summary[
+    (summary["years"] == 3) &
+    (summary["total_applicants"] >= 50)
+].copy()
+
+# Consistent outperformers
+consistent = stable[
+    stable["positive_years"] == 3
+].sort_values(
+    "outperformance_pp",
+    ascending=False
+)
+
+# -----------------------------
+# Header
+# -----------------------------
+st.title("🐻 Who Beats the Berkeley Odds?")
+
+st.subheader(
+    "Which Bay Area public high schools consistently outperformed "
+    "their expected UC Berkeley admit rate from 2023–2025?"
+)
+
+st.caption(
+    "Expected admit rates account for a-g completion, poverty, "
+    "applicant GPA, and school size."
+)
+
+# -----------------------------
+# Key metrics
+# -----------------------------
+top_school = consistent.iloc[0]
+
+c1, c2, c3, c4 = st.columns(4)
+
+c1.metric(
+    "Schools Analyzed",
+    f"{len(stable):,}"
+)
+
+c2.metric(
+    "Berkeley Applicants",
+    f"{int(stable['total_applicants'].sum()):,}"
+)
+
+c3.metric(
+    "Top Outperformer",
+    top_school["high_school"].title()
+)
+
+c4.metric(
+    "Top Outperformance",
+    f"+{top_school['outperformance_pp']:.1f} pp"
+)
+
+st.divider()
+
+# -----------------------------
+# Headline finding
+# -----------------------------
+st.header("Headline Finding")
+
+st.success(
+    f"**{top_school['high_school'].title()}** was the strongest consistent "
+    f"outperformer. From 2023–2025, its actual Berkeley admit rate was "
+    f"**{top_school['actual_rate']:.1%}**, compared with an expected rate of "
+    f"**{top_school['expected_rate']:.1%}** — an outperformance of "
+    f"**{top_school['outperformance_pp']:.1f} percentage points**."
+)
+
+# -----------------------------
+# Chart 1: actual vs expected
+# -----------------------------
+st.header("1. Actual vs. Expected Berkeley Admit Rate")
+
+fig_scatter = px.scatter(
+    stable,
+    x="expected_rate",
+    y="actual_rate",
+    size="total_applicants",
+    hover_name="high_school",
+    hover_data={
+        "total_applicants": True,
+        "expected_rate": ":.1%",
+        "actual_rate": ":.1%",
+        "outperformance_pp": ":.1f"
+    },
+    labels={
+        "expected_rate": "Expected Admit Rate",
+        "actual_rate": "Actual Admit Rate",
+        "total_applicants": "Applicants"
+    }
+)
+
+max_rate = max(
+    stable["actual_rate"].max(),
+    stable["expected_rate"].max()
+)
+
+fig_scatter.add_trace(
+    go.Scatter(
+        x=[0, max_rate],
+        y=[0, max_rate],
+        mode="lines",
+        name="Actual = Expected",
+        line=dict(dash="dash")
+    )
+)
+
+fig_scatter.update_layout(
+    xaxis_tickformat=".0%",
+    yaxis_tickformat=".0%",
+    height=550
+)
+
+st.plotly_chart(fig_scatter, use_container_width=True)
+
+st.caption(
+    "Schools above the dashed line admitted students at a higher rate "
+    "than the model predicted. Bubble size represents total Berkeley applicants."
+)
+
+# -----------------------------
+# Chart 2: top outperformers
+# -----------------------------
+st.header("2. Most Consistent Outperformers")
+
+top10 = consistent.head(10).sort_values(
+    "outperformance_pp",
+    ascending=True
+)
+
+fig_bar = px.bar(
+    top10,
+    x="outperformance_pp",
+    y="high_school",
+    orientation="h",
+    text="outperformance_pp",
+    labels={
+        "outperformance_pp": "Outperformance (percentage points)",
+        "high_school": ""
+    }
+)
+
+fig_bar.update_traces(
+    texttemplate="%{text:.1f} pp",
+    textposition="outside"
+)
+
+fig_bar.update_layout(height=550)
+
+st.plotly_chart(fig_bar, use_container_width=True)
+
+st.caption(
+    "To qualify as a consistent outperformer, a school must have data "
+    "for all three years, at least 50 total Berkeley applicants, and "
+    "an actual admit rate above expectation in every year."
+)
+
+# -----------------------------
+# Chart 3: school explorer
+# -----------------------------
+st.header("3. Explore a School")
+
+school = st.selectbox(
+    "Choose a high school",
+    sorted(stable["high_school"].tolist())
+)
+
+school_data = berkeley[
+    berkeley["high_school"] == school
+].sort_values("fall_term").copy()
+
+school_data["actual_rate"] = (
+    school_data["admits"] /
+    school_data["applicants"]
+)
+
+school_data["difference_pp"] = (
+    school_data["actual_rate"] -
+    school_data["expected_admit_rate"]
+) * 100
+
+left, right = st.columns([2, 1])
+
+with left:
+    fig_school = go.Figure()
+
+    fig_school.add_trace(
+        go.Scatter(
+            x=school_data["fall_term"],
+            y=school_data["actual_rate"],
+            mode="lines+markers",
+            name="Actual admit rate"
+        )
+    )
+
+    fig_school.add_trace(
+        go.Scatter(
+            x=school_data["fall_term"],
+            y=school_data["expected_admit_rate"],
+            mode="lines+markers",
+            name="Expected admit rate"
+        )
+    )
+
+    fig_school.update_layout(
+        xaxis_title="Fall Term",
+        yaxis_title="Admit Rate",
+        yaxis_tickformat=".0%",
+        height=400
+    )
+
+    st.plotly_chart(fig_school, use_container_width=True)
+
+with right:
+    display_table = school_data[
+        [
+            "fall_term",
+            "applicants",
+            "admits",
+            "actual_rate",
+            "expected_admit_rate",
+            "difference_pp"
+        ]
+    ].copy()
+
+    display_table.columns = [
+        "Year",
+        "Applicants",
+        "Admits",
+        "Actual",
+        "Expected",
+        "Difference (pp)"
+    ]
+
+    display_table["Actual"] = display_table["Actual"].map(
+        lambda x: f"{x:.1%}"
+    )
+
+    display_table["Expected"] = display_table["Expected"].map(
+        lambda x: f"{x:.1%}"
+    )
+
+    display_table["Difference (pp)"] = display_table[
+        "Difference (pp)"
+    ].map(lambda x: f"{x:+.1f}")
+
+    st.dataframe(
+        display_table,
+        hide_index=True,
+        use_container_width=True
+    )
+
+# -----------------------------
+# Methodology
+# -----------------------------
+st.divider()
+st.header("Methodology")
+
+st.markdown(
+    """
+This analysis uses the provided **dashboard_data.csv** dataset and focuses on
+Bay Area public high schools with UC Berkeley applicants from **Fall 2023
+through Fall 2025**.
+
+The dataset provides an **expected admit rate** based on a-g completion,
+poverty, applicant GPA, and school size. I compare each school's actual
+Berkeley admit rate with that expected baseline.
+
+For multi-year comparisons, expected admits and actual admits are aggregated
+using applicant counts rather than averaging annual percentages. This prevents
+a small applicant cohort from receiving the same weight as a much larger one.
+
+For the consistent-outperformer ranking, schools must:
+
+- have observations in all three years,
+- have at least **50 total Berkeley applicants**, and
+- outperform their expected admit rate in all three years.
+
+These are aggregated school-level relationships. They should not be interpreted
+as causal effects or as predictions of any individual student's admission.
+"""
+)
+
+st.caption(
+    "Source: UC Admissions Data Challenge datasets derived from the "
+    "University of California Information Center and California Department of Education."
+)
