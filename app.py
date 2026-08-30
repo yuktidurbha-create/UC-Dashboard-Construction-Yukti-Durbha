@@ -89,7 +89,12 @@ st.caption(
     "Expected admit rates account for a-g completion, poverty, "
     "applicant GPA, and school size."
 )
-
+st.info(
+    "**Why actual vs. expected?** A high raw admit rate may reflect differences "
+    "in applicant GPA or school context. Comparing actual results with the "
+    "expected baseline helps identify schools whose Berkeley outcomes are "
+    "unusually strong relative to those factors."
+)
 # -----------------------------
 # Key metrics
 # -----------------------------
