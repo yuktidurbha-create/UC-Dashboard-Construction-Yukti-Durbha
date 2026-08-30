@@ -286,7 +286,7 @@ st.caption(
     "in percentage points. Positive values indicate outperformance."
 )
 # -----------------------------
-# Chart 3: school explorer
+# Chart 4: school explorer
 # -----------------------------
 st.header("4. Explore a School")
 
@@ -318,7 +318,47 @@ school_data["difference_pp"] = (
     school_data["actual_rate"] -
     school_data["expected_admit_rate"]
 ) * 100
+school_total_applicants = school_data["applicants"].sum()
+school_total_admits = school_data["admits"].sum()
 
+school_actual_rate = (
+    school_total_admits /
+    school_total_applicants
+)
+
+school_expected_rate = (
+    (
+        school_data["expected_admit_rate"]
+        * school_data["applicants"]
+    ).sum()
+    / school_total_applicants
+)
+
+school_difference = (
+    school_actual_rate - school_expected_rate
+) * 100
+
+m1, m2, m3, m4 = st.columns(4)
+
+m1.metric(
+    "3-Year Applicants",
+    f"{int(school_total_applicants):,}"
+)
+
+m2.metric(
+    "Actual Admit Rate",
+    f"{school_actual_rate:.1%}"
+)
+
+m3.metric(
+    "Expected Admit Rate",
+    f"{school_expected_rate:.1%}"
+)
+
+m4.metric(
+    "Difference",
+    f"{school_difference:+.1f} pp"
+)
 left, right = st.columns([2, 1])
 
 with left:
