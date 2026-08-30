@@ -36,13 +36,16 @@ berkeley = load_data()
 # -----------------------------
 # Multi-year school summary
 # -----------------------------
-summary = berkeley.groupby("high_school").agg(
+summary = berkeley.groupby(
+    ["atp_code", "high_school", "city"],
+    as_index=False
+).agg(
     total_applicants=("applicants", "sum"),
     total_admits=("admits", "sum"),
     expected_admits=("expected_admits", "sum"),
     years=("fall_term", "nunique"),
     positive_years=("admit_rate_residual", lambda x: (x > 0).sum())
-).reset_index()
+)
 
 summary["actual_rate"] = (
     summary["total_admits"] /
@@ -224,13 +227,23 @@ st.caption(
 # -----------------------------
 st.header("3. Explore a School")
 
-school = st.selectbox(
-    "Choose a high school",
-    sorted(stable["high_school"].tolist())
+stable["school_label"] = (
+    stable["high_school"].str.title()
+    + " — "
+    + stable["city"].str.title()
 )
 
+school_label = st.selectbox(
+    "Choose a high school",
+    sorted(stable["school_label"].tolist())
+)
+
+selected = stable[
+    stable["school_label"] == school_label
+].iloc[0]
+
 school_data = berkeley[
-    berkeley["high_school"] == school
+    berkeley["atp_code"] == selected["atp_code"]
 ].sort_values("fall_term").copy()
 
 school_data["actual_rate"] = (
