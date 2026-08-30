@@ -81,7 +81,7 @@ consistent = stable[
 st.title("Berkeley Admissions: Actual vs. Expected")
 
 st.subheader(
-    "Which Bay Area public high schools consistently exceeded"
+    "Which Bay Area public high schools consistently exceeded "
     "their expected UC Berkeley admit rate from 2023–2025?"
 )
 
