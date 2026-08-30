@@ -61,10 +61,28 @@ summary["outperformance_pp"] = (
     summary["expected_rate"]
 ) * 100
 
+# -----------------------------
+# Interactive sample-size threshold
+# -----------------------------
+min_applicants = st.sidebar.slider(
+    "Minimum 3-year Berkeley applicants",
+    min_value=25,
+    max_value=200,
+    value=50,
+    step=25,
+    help=(
+        "Increase the threshold to test whether the outperformance "
+        "ranking remains similar when smaller applicant pools are excluded."
+    )
+)
+st.sidebar.caption(
+    "Use this as a sensitivity test: stricter thresholds reduce the influence "
+    "of smaller applicant pools."
+)
 # Schools with all 3 years and enough applicants
 stable = summary[
     (summary["years"] == 3) &
-    (summary["total_applicants"] >= 50)
+    (summary["total_applicants"] >= min_applicants)
 ].copy()
 
 # Consistent outperformers
@@ -227,9 +245,9 @@ fig_bar.update_layout(height=550)
 st.plotly_chart(fig_bar, use_container_width=True)
 
 st.caption(
-    "To qualify as a consistent outperformer, a school must have data "
-    "for all three years, at least 50 total Berkeley applicants, and "
-    "an actual admit rate above expectation in every year."
+    f"Current filter: schools must have all three years of data, at least "
+    f"{min_applicants} total Berkeley applicants, and outperform their "
+    f"expected admit rate in every year."
 )
 # -----------------------------
 # Chart 3: year-by-year consistency
@@ -460,7 +478,7 @@ st.divider()
 
 with st.expander("Methodology & Limitations"):
     st.markdown(
-        """
+       f"""
 ### How I measured outperformance
 
 This analysis uses the provided `dashboard_data.csv` and focuses on
@@ -482,10 +500,10 @@ actual Berkeley admit rate and its expected admit rate.
 A school must:
 
 - have observations in **all three years (2023–2025)**
-- have at least **50 total Berkeley applicants**
+- have at least **{min_applicants} total Berkeley applicants**
 - exceed its expected admit rate in **each of the three years**
 
-The 50-applicant threshold helps reduce volatility from very small
+The **{min_applicants}-applicant threshold helps reduce volatility from very small
 applicant pools.
 
 ### Multi-year calculation
