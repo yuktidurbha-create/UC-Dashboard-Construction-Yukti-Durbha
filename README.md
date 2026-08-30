@@ -6,7 +6,7 @@ https://uc-dashboard-construction-yukti-durbha-6tgvyefcgabvfnb52rpek5.streamlit.
 ## Research Question
 
 From 2023–2025, which Bay Area public high schools consistently
-outperformed their expected UC Berkeley admission rate?
+exceeded their expected UC Berkeley admission rate?
 
 ## Key Finding
 
