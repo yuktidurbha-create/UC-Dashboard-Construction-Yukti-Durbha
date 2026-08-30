@@ -438,42 +438,43 @@ st.divider()
 with st.expander("Methodology & Limitations"):
     st.markdown(
         """
-### How the analysis works
+### How I measured outperformance
 
-This analysis uses the provided `dashboard_data.csv` dataset and focuses on
-Bay Area public high schools with UC Berkeley applicants from **Fall 2023
-through Fall 2025**.
+This analysis uses the provided `dashboard_data.csv` and focuses on
+Bay Area public high schools with UC Berkeley applicants from
+**Fall 2023 through Fall 2025**.
 
-The dataset provides an **expected admit rate** based on:
+The provided **expected admit rate** accounts for:
 
 - a-g completion
 - poverty
 - applicant GPA
 - school size
 
-I compare each school's actual Berkeley admit rate with that expected baseline.
+I define **outperformance** as the difference between a school's
+actual Berkeley admit rate and its expected admit rate.
 
-### What counts as a "consistent outperformer"?
+### What counts as consistent?
 
 A school must:
 
-- have observations in **all three years (2023–2025)**,
-- have at least **50 total Berkeley applicants**, and
-- outperform its expected admit rate in **every year**.
+- have observations in **all three years (2023–2025)**
+- have at least **50 total Berkeley applicants**
+- exceed its expected admit rate in **each of the three years**
 
-The 50-applicant minimum reduces the influence of very small applicant pools,
-where only a few admission decisions can dramatically change the admit rate.
+The 50-applicant threshold helps reduce volatility from very small
+applicant pools.
 
 ### Multi-year calculation
 
-Actual and expected admits are aggregated using applicant counts before
-calculating the three-year rates. This avoids giving a small applicant cohort
-the same weight as a much larger one.
+Actual and expected admits are aggregated using applicant counts
+before calculating the three-year rates, rather than simply averaging
+annual percentages.
 
-### Important limitation
+### Limitations
 
-These are aggregated **school-level relationships**, not individual student
-records. The results should not be interpreted as causal effects or as
-predictions of an individual student's probability of admission.
+These data are aggregated at the high-school level. The results show
+school-level patterns and should **not** be interpreted as causal
+effects or as predictions of an individual student's admission.
 """
     )
