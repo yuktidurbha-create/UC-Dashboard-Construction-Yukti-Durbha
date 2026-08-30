@@ -405,6 +405,64 @@ m4.metric(
     "Difference",
     f"{school_difference:+.1f} pp"
 )
+# -----------------------------
+# School context
+# -----------------------------
+st.subheader("School Context")
+
+latest = school_data.sort_values("fall_term").iloc[-1]
+
+applicant_gpa = (
+    f"{latest['applicant_gpa']:.2f}"
+    if pd.notna(latest["applicant_gpa"])
+    else "N/A"
+)
+
+ag_completion = (
+    f"{latest['ag_completion_rate']:.1%}"
+    if pd.notna(latest["ag_completion_rate"])
+    else "N/A"
+)
+
+frpm = (
+    f"{latest['frpm_pct']:.1%}"
+    if pd.notna(latest["frpm_pct"])
+    else "N/A"
+)
+
+cohort_size = (
+    f"{int(latest['cohort_students']):,}"
+    if pd.notna(latest["cohort_students"])
+    else "N/A"
+)
+
+c1, c2, c3, c4 = st.columns(4)
+
+c1.metric(
+    "Applicant GPA",
+    applicant_gpa
+)
+
+c2.metric(
+    "A-G Completion",
+    ag_completion
+)
+
+c3.metric(
+    "Free/Reduced Lunch",
+    frpm
+)
+
+c4.metric(
+    "School Cohort Size",
+    cohort_size
+)
+
+st.caption(
+    "2025 school context. These are among the characteristics used in the "
+    "expected-admit-rate baseline, helping explain why actual versus expected "
+    "is more informative than raw admit rate alone."
+)
 left, right = st.columns([2, 1])
 
 with left:
