@@ -182,11 +182,17 @@ fig_scatter.update_layout(
     height=550
 )
 
-st.plotly_chart(fig_scatter, use_container_width=True)
-
+st.plotly_chart(
+    fig_scatter,
+    use_container_width=True,
+    config={
+        "scrollZoom": True,
+        "displaylogo": False
+    }
+)
 st.caption(
-    "Schools above the dashed line admitted students at a higher rate "
-    "than the model predicted. Bubble size represents total Berkeley applicants."
+    "Hover over a school for details. Zoom or pan to explore the cluster."
+    "Schools above the dashed line performed above the expected baseline."
 )
 
 # -----------------------------
@@ -284,8 +290,14 @@ fig_heat.update_layout(
     coloraxis_colorbar_title="pp"
 )
 
-st.plotly_chart(fig_heat, use_container_width=True)
-
+st.plotly_chart(
+    fig_heat,
+    use_container_width=True,
+    config={
+        "scrollZoom": True,
+        "displaylogo": False
+    }
+)
 st.caption(
     "Each cell shows actual Berkeley admit rate minus expected admit rate "
     "in percentage points. Positive values indicate outperformance."
@@ -394,8 +406,14 @@ with left:
         height=400
     )
 
-    st.plotly_chart(fig_school, use_container_width=True)
-
+st.plotly_chart(
+    fig_school,
+    use_container_width=True,
+    config={
+        "scrollZoom": True,
+        "displaylogo": False
+    }
+)
 with right:
     display_table = school_data[
         [
