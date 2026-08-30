@@ -64,27 +64,38 @@ summary["outperformance_pp"] = (
 # -----------------------------
 # Interactive sample-size threshold
 # -----------------------------
+# -----------------------------
+# Interactive sample-size threshold
+# -----------------------------
 min_applicants = st.sidebar.slider(
     "Minimum 3-year Berkeley applicants",
     min_value=25,
     max_value=200,
     value=50,
     step=25,
+    key="min_applicants_slider",
     help=(
         "Increase the threshold to test whether the outperformance "
         "ranking remains similar when smaller applicant pools are excluded."
     )
 )
+
 st.sidebar.caption(
     "Use this as a sensitivity test: stricter thresholds reduce the influence "
     "of smaller applicant pools."
 )
-# Schools with all 3 years and enough applicants
+
+# Re-filter schools every time the slider changes
 stable = summary[
     (summary["years"] == 3) &
     (summary["total_applicants"] >= min_applicants)
 ].copy()
 
+# This lets us visibly confirm the slider is working
+st.sidebar.metric(
+    "Qualifying schools",
+    len(stable)
+)
 # Consistent outperformers
 consistent = stable[
     stable["positive_years"] == 3
