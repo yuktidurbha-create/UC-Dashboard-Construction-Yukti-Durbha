@@ -220,11 +220,76 @@ st.caption(
     "for all three years, at least 50 total Berkeley applicants, and "
     "an actual admit rate above expectation in every year."
 )
+# -----------------------------
+# Chart 3: year-by-year consistency
+# -----------------------------
+st.header("3. Year-by-Year Outperformance")
 
+# Get the top 10 consistent outperformers
+top_ids = consistent.head(10)["atp_code"].tolist()
+
+heat = berkeley[
+    berkeley["atp_code"].isin(top_ids)
+].copy()
+
+heat["school_label"] = (
+    heat["high_school"].str.title()
+    + " — "
+    + heat["city"].str.title()
+)
+
+# Residual = actual admit rate minus expected admit rate
+heat["outperformance_pp"] = (
+    heat["admit_rate_residual"] * 100
+)
+
+heatmap_data = heat.pivot(
+    index="school_label",
+    columns="fall_term",
+    values="outperformance_pp"
+)
+
+# Keep schools ordered by overall outperformance
+order = (
+    consistent.head(10)
+    .assign(
+        school_label=lambda x:
+            x["high_school"].str.title()
+            + " — "
+            + x["city"].str.title()
+    )["school_label"]
+    .tolist()
+)
+
+heatmap_data = heatmap_data.reindex(order)
+
+fig_heat = px.imshow(
+    heatmap_data,
+    text_auto=".1f",
+    aspect="auto",
+    labels={
+        "x": "Fall Term",
+        "y": "High School",
+        "color": "Difference (pp)"
+    },
+    color_continuous_midpoint=0
+)
+
+fig_heat.update_layout(
+    height=500,
+    coloraxis_colorbar_title="pp"
+)
+
+st.plotly_chart(fig_heat, use_container_width=True)
+
+st.caption(
+    "Each cell shows actual Berkeley admit rate minus expected admit rate "
+    "in percentage points. Positive values indicate outperformance."
+)
 # -----------------------------
 # Chart 3: school explorer
 # -----------------------------
-st.header("3. Explore a School")
+st.header("4. Explore a School")
 
 stable["school_label"] = (
     stable["high_school"].str.title()
