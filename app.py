@@ -271,8 +271,7 @@ fig_heat = px.imshow(
         "x": "Fall Term",
         "y": "High School",
         "color": "Difference (pp)"
-    },
-    color_continuous_midpoint=0
+    }
 )
 
 fig_heat.update_layout(
