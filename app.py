@@ -462,7 +462,7 @@ st.caption(
     "2025 school context. These are among the characteristics used in the "
     "expected-admit-rate baseline, helping explain why actual versus expected "
     "is more informative than raw admit rate alone."
-))left, right = st.columns([2, 1])
+left, right = st.columns([2, 1])
 
 with left:
     fig_school = go.Figure()
