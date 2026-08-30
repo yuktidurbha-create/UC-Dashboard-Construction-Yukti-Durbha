@@ -108,7 +108,7 @@ c1.metric(
 )
 
 c2.metric(
-    "Berkeley Applicants",
+    "Applicants in Qualifying Schools",
     f"{int(stable['total_applicants'].sum()):,}"
 )
 
