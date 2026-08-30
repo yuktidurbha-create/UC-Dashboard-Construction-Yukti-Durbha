@@ -412,58 +412,55 @@ st.subheader("School Context")
 
 latest = school_data.sort_values("fall_term").iloc[-1]
 
+# -----------------------------
+# School context
+# -----------------------------
+st.subheader("School Context")
+
+latest = school_data.sort_values("fall_term").iloc[-1]
+
+# Safely convert context fields to numbers
+gpa_val = pd.to_numeric(latest["applicant_gpa"], errors="coerce")
+ag_val = pd.to_numeric(latest["ag_completion_rate"], errors="coerce")
+frpm_val = pd.to_numeric(latest["frpm_pct"], errors="coerce")
+cohort_val = pd.to_numeric(latest["cohort_students"], errors="coerce")
+
 applicant_gpa = (
-    f"{latest['applicant_gpa']:.2f}"
-    if pd.notna(latest["applicant_gpa"])
+    f"{gpa_val:.2f}"
+    if pd.notna(gpa_val)
     else "N/A"
 )
 
 ag_completion = (
-    f"{latest['ag_completion_rate']:.1f%}"
-    if pd.notna(latest["ag_completion_rate"])
+    f"{ag_val:.1f}%"
+    if pd.notna(ag_val)
     else "N/A"
 )
 
 frpm = (
-    f"{latest['frpm_pct']:.1%}"
-    if pd.notna(latest["frpm_pct"])
+    f"{frpm_val:.1%}"
+    if pd.notna(frpm_val)
     else "N/A"
 )
 
 cohort_size = (
-    f"{int(latest['cohort_students']):,}"
-    if pd.notna(latest["cohort_students"])
+    f"{int(cohort_val):,}"
+    if pd.notna(cohort_val)
     else "N/A"
 )
 
 c1, c2, c3, c4 = st.columns(4)
 
-c1.metric(
-    "Applicant GPA",
-    applicant_gpa
-)
-
-c2.metric(
-    "A-G Completion",
-    ag_completion
-)
-
-c3.metric(
-    "Free/Reduced Lunch",
-    frpm
-)
-
-c4.metric(
-    "School Cohort Size",
-    cohort_size
-)
+c1.metric("Applicant GPA", applicant_gpa)
+c2.metric("A-G Completion", ag_completion)
+c3.metric("Free/Reduced Lunch", frpm)
+c4.metric("School Cohort Size", cohort_size)
 
 st.caption(
     "2025 school context. These are among the characteristics used in the "
     "expected-admit-rate baseline, helping explain why actual versus expected "
     "is more informative than raw admit rate alone."
-)
-left, right = st.columns([2, 1])
+)left, right = st.columns([2, 1])
 
 with left:
     fig_school = go.Figure()
