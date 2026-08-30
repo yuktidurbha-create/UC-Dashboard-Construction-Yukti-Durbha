@@ -419,7 +419,7 @@ applicant_gpa = (
 )
 
 ag_completion = (
-    f"{latest['ag_completion_rate']:.1%}"
+    f"{latest['ag_completion_rate']:.1f%}"
     if pd.notna(latest["ag_completion_rate"])
     else "N/A"
 )
